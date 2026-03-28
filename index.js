@@ -95,7 +95,29 @@ function renderFeed(list) {
 
 // Like button logic
 feed.addEventListener("click", event => {
-  // TODO: Implement like button click handler
+  if (event.target.matches("button[data-id]") || event.target.tagName === "BUTTON") {
+    const postId = parseInt(event.target.dataset.id);
+    const post = posts.find(p => p.id === postId);
+    const userActions = getUserActions();
+
+    // Toggle like status
+    if (userActions[postId]?.liked) {
+      post.likes--;
+      userActions[postId].liked = false;
+    } else {
+      post.likes++;
+      userActions[postId] = { liked: true };
+    }
+
+    setUserActions(userActions);
+    saveLikes(); // Save updated likes to localStorage
+    applyFilterAndSort(); // Re-apply filter and sort to maintain the current view
+    renderFeed(posts); // Re-render the feed to update the like count
+
+    // Update the button text to reflect the new like count
+    const button = event.target.closest('.post-actions').querySelector(`button[data-id="${postId}"]`);
+    button.textContent = `👍 ${userActions[postId]?.liked ? 'Unlike' : 'Like'} (${post.likes})`;
+  }
 });
 
 function applySorting(list, sortBy) {
